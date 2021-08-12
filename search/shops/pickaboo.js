@@ -65,11 +65,11 @@ const getPickabooUrl = (q) => {
 
 // parse html string for pickaboo
 const parseTextPickaboo = (text, isSecondary, formData) => {
-    let urls = []
+    let links = []
     const { document } = new JSDOM(text).window
     const results = parsePickaboo(document)
     if (!isSecondary) {
-        urls = checkPaginationPickaboo(document, formData)
+        links = checkPaginationPickaboo(document, formData)
     }
     return { links, results }
 }

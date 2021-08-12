@@ -59,11 +59,11 @@ const getTrendytrackerUrl = (q) => {
 
 // parse html string for trendytracker
 const parseTextTrendytracker = (text, isSecondary, formData) => {
-    let urls = []
+    let links = []
 
     const results = parseTrendytracker(JSON.parse(text))
     if (!isSecondary) {
-        urls = checkPaginationTrendytracker(text, formData)
+        links = checkPaginationTrendytracker(text, formData)
     }
     return { links, results }
 }

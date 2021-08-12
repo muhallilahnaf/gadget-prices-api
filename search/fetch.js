@@ -19,7 +19,7 @@ const getFetchs = (urls) => {
 
 
 // process responses
-const processResponses = async (responses, allResults, isSecondary, formData) => {
+const processResponses = (responses, allResults, isSecondary, formData) => {
     let urls = []
     let resDict = {
         'robishop.com.bd': [],
@@ -50,60 +50,76 @@ const processResponses = async (responses, allResults, isSecondary, formData) =>
 
     const biggerPromise = Promise.all(promiseArrArr.map(arr => Promise.all(arr)))
 
-    biggerPromise.then(resultArrArr => {
+    return new Promise((resolve, reject) => {
 
-        for (const [key, value] of Object.entries(arrPosTracker)) {
-            if (key === 'robishop.com.bd') {
-                resultArrArr[value].forEach(text => {
-                    urls = urls.concat(parseTextRobishop(text, isSecondary)) //json
-                })
-            }
-            if (key === 'www.pickaboo.com') {
-                resultArrArr[value].forEach(text => {
-                    urls = urls.concat(parseTextPickaboo(text, isSecondary))
-                })
-            }
-            if (key === 'www.searchanise.com') {
-                resultArrArr[value].forEach(text => {
-                    urls = urls.concat(parseTextPenguinbd(text, isSecondary)) //json
-                })
-            }
-            if (key === 'api.trendy-tracker.com') {
-                resultArrArr[value].forEach(text => {
-                    urls = urls.concat(parseTextTrendytracker(text, isSecondary)) //json
-                })
-            }
-            if (key === 'gadgetandgear.com') {
-                resultArrArr[value].forEach(text => {
-                    const { links, results } = parseTextGadgetngear(text, isSecondary, formData)
-                    urls = urls.concat(links)
-                    allResults = allResults.concat(results)
-                })
-            }
-        }
+        biggerPromise.then(resultArrArr => {
 
-        if (!isSecondary && urls.length > 0) {
-            return await secondaryFetch(urls, allResults, formData)
-        } else {
-            console.log(allResults.length)
-            return allResults
-        }
-    }).catch(e => console.log(e))
+            for (const [key, value] of Object.entries(arrPosTracker)) {
+                if (key === 'robishop.com.bd') {
+                    resultArrArr[value].forEach(text => {
+                        const { links, results } = parseTextRobishop(text, isSecondary, formData) //json
+                        urls = urls.concat(links)
+                        allResults = allResults.concat(results)
+                    })
+                }
+                if (key === 'www.pickaboo.com') {
+                    resultArrArr[value].forEach(text => {
+                        const { links, results } = parseTextPickaboo(text, isSecondary, formData)
+                        urls = urls.concat(links)
+                        allResults = allResults.concat(results)
+                    })
+                }
+                if (key === 'www.searchanise.com') {
+                    resultArrArr[value].forEach(text => {
+                        const { links, results } = parseTextPenguinbd(text, isSecondary, formData) //json
+                        urls = urls.concat(links)
+                        allResults = allResults.concat(results)
+                    })
+                }
+                if (key === 'api.trendy-tracker.com') {
+                    resultArrArr[value].forEach(text => {
+                        const { links, results } = parseTextTrendytracker(text, isSecondary, formData) //json
+                        urls = urls.concat(links)
+                        allResults = allResults.concat(results)
+                    })
+                }
+                if (key === 'gadgetandgear.com') {
+                    resultArrArr[value].forEach(text => {
+                        const { links, results } = parseTextGadgetngear(text, isSecondary, formData)
+                        urls = urls.concat(links)
+                        allResults = allResults.concat(results)
+                    })
+                }
+            }
+
+            if (!isSecondary && urls.length > 0) {
+                resolve(secondaryFetch(urls, allResults, formData))
+            } else {
+                console.log(allResults.length)
+                resolve(allResults)
+            }
+        }).catch(e => reject(e))
+    })
 }
 
 
 // secondary fetch
-const secondaryFetch = async (urls, allResults, formData) => {
+const secondaryFetch = (urls, allResults, formData) => {
     console.log('secondary')
     let secondaryPromises = getFetchs(urls)
-    Promise.all(secondaryPromises).then(responses => {
-        return await processResponses(responses, allResults, true, formData)
-    }).catch(e => console.log(e))
+
+    return new Promise((resolve, reject) => {
+        Promise.all(secondaryPromises).then(responses => {
+            processResponses(responses, allResults, true, formData).then(allResults => {
+                resolve(allResults)
+            }).catch(e => reject(e))
+        }).catch(e => reject(e))
+    })
 }
 
 
 // primary fetch
-const primaryFetch = async (data) => {
+const primaryFetch = (data) => {
     let urls = []
     data.shops.forEach(shop => {
         switch (shop) {
@@ -127,11 +143,14 @@ const primaryFetch = async (data) => {
         }
     })
     console.log(urls)
-    let primaryPromises = getFetchs(urls)
-    Promise.all(primaryPromises).then(responses => {
-        const allResults = await processResponses(responses, [], false, data)
-        return allResults
-    }).catch(e => console.log(e))
+    return new Promise((resolve, reject) => {
+        let primaryPromises = getFetchs(urls)
+        Promise.all(primaryPromises).then(responses => {
+            processResponses(responses, [], false, data).then(allResults => {
+                resolve(allResults)
+            }).catch(e => reject(e))
+        }).catch(e => reject(e))
+    })
 }
 
 module.exports = { primaryFetch }

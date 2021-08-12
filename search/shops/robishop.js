@@ -65,11 +65,11 @@ const getRobishopUrl = (q) => {
 
 // parse html string for robishop
 const parseTextRobishop = (text, isSecondary, formData) => {
-    let urls = []
+    let links = []
 
     const results = parseRobishop(JSON.parse(text))
     if (!isSecondary) {
-        urls = checkPaginationRobishop(text, formData)
+        links = checkPaginationRobishop(text, formData)
     }
     return { links, results }
 }

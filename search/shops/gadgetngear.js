@@ -1,4 +1,5 @@
-item
+const { JSDOM } = require("jsdom")
+
 // check pagination gadgetngear
 const checkPaginationGadgetngear = (doc, formData) => {
     let links = []
@@ -75,7 +76,7 @@ const getGadgetngearUrl = (q) => {
 
 // parse html string for gadgetngear
 const parseTextGadgetngear = (text, isSecondary, formData) => {
-    let urls = []
+    let links = []
     const { document } = new JSDOM(text).window
     const results = parseGadgetngear(document)
     if (!isSecondary) {

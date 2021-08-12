@@ -1,5 +1,6 @@
-// process parsedResults
-const processResult = (product) => {
+// process allResults
+const processResults = (allResults) => allResults.map(product => {
+
     // price
     let parsedPrice
     let price = product['price']
@@ -36,12 +37,12 @@ const processResult = (product) => {
             shop = ''
             break
     }
-    
 
-    // PUSH DATA
-    parsedResults.push({
+    return {
         ...product,
         price,
         shop
-    })
-}
+    }
+})
+
+module.exports = { processResults }

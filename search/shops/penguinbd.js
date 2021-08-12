@@ -56,11 +56,11 @@ const getPenguinbdUrl = (q) => {
 
 // parse html string for penguinbd
 const parseTextPenguinbd = (text, isSecondary, formData) => {
-    let urls = []
+    let links = []
 
     const results = parsePenguinbd(text)
     if (!isSecondary) {
-        urls = checkPaginationPenguinbd(text, formData)
+        links = checkPaginationPenguinbd(text, formData)
     }
     return { links, results }
 }
