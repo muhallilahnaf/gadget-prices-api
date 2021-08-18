@@ -2,18 +2,12 @@ module.exports = (app) => {
     
     const phoneControllers = require('../controllers/phone')
 
-    // Create a new Phone
-    app.post('/phone', phoneControllers.create)
-
     // Retrieve all Phones
     app.get('/phone', phoneControllers.findAll)
 
-    // Retrieve a single Phone with phoneId
-    app.get('/phone/:phoneId', phoneControllers.findOne)
+    // Retrieve Phones by version
+    app.get('/phone/version/:versionName', phoneControllers.findByVersionName)
 
-    // Update a Phone with phoneId
-    app.put('/phone/:phoneId', phoneControllers.update)
-
-    // Delete a Phone with phoneId
-    app.delete('/phone/:phoneId', phoneControllers.delete)
+    // Update or create a Phone with shop and name
+    app.put('/phone', phoneControllers.updateOrCreate)
 }

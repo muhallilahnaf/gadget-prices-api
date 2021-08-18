@@ -1,57 +1,87 @@
 const Phone = require('../db/models/phone')
-const {phoneReqValidation} = require('../helpers/phone') 
+const {phoneUpdateReqValidation, keys} = require('../helpers/phone') 
 
 const create = (req, res) => {
-    // Validate request
-    // phonereqvaliation
-    if(!req.body.content) {
-        return res.status(400).send({
-            message: "Phone content can not be empty"
-        })
-    }
-
-    // Create a Phone
-    const phone = new Phone({
-        shop: req.body.shop,
-        name: req.body.name,
-        link: req.body.link,
-        price: req.body.price,
-        brand: req.body.brand,
-        status: req.body.status
+    let dict = {}
+    keys.forEach(key => {
+        dict[key] = req.body[key]
     })
-
-    // Save Note in the database
-    note.save()
-    .then(data => {
-        res.send(data);
+    const phone = new Phone(dict)
+    phone.save().then(data => {
+        res.send(data)
     }).catch(err => {
         res.status(500).send({
-            message: err.message || "Some error occurred while creating the Note."
-        });
-    });
+            message: err.message || "Some error occurred while creating the Phone"
+        })
+    })
 }
 
-// Create and Save a new phone
-exports.create = (req, res) => {
 
-};
+const findAll = (req, res) => {
+    Phone.find().lean().then(phones => {
+        res.send(phones)
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Some error occurred while retrieving phones"
+        })
+    })
+}
 
-// Retrieve and return all phones from the database.
-exports.findAll = (req, res) => {
 
-};
+const findByVersionName = (req, res) => {
+    const name = req.params.versionName
+    if (!name) {
+        return res.status(500).send({
+            message: 'info missing'
+        })
+    }
+    Phone.find({latestVersion: name}).lean().then(phones => {
+        res.send(phones)
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Some error occurred while retrieving phones"
+        })
+    })
+}
 
-// Find a single phone with a phoneId
-exports.findOne = (req, res) => {
 
-};
+const updateOrCreate = (req, res) => {
+    const invalid = phoneUpdateReqValidation(req.body)
+    if (invalid) {
+        return res.status(500).send({
+            message: "info missing"
+        })
+    }
+    const query = {
+        shop: req.body.shop,
+        name: req.body.name
+    }
+    const update = {
+        $set: {
+            shop: req.body.shop,
+            name: req.body.name,
+            link: req.body.link,
+            brand: req.body.brand,
+            status: req.body.status,
+            latestVersion: req.body.version          
+        },
+        $push: {
+            prices: {
+                price: req.body.price,
+                version: req.body.version
+            }
+        }
+    }
+    const options = {upsert: true, new: true, setDefaultsOnInsert: true}
+    Phone.findOneAndUpdate(query, update, options).then(phone => {
+        res.send(phone)
+    }).catch(err => {
+        return res.status(500).send({
+            message: err.message
+        })
+    })
+}
 
-// Update a phone identified by the phoneId in the request
-exports.update = (req, res) => {
-
-};
-
-// Delete a phone with the specified phoneId in the request
-exports.delete = (req, res) => {
-
-};
+module.exports = {
+    create, findByVersionName, findAll, updateOrCreate
+}

@@ -1,14 +1,11 @@
-const phoneReqValidation = (body) => {
+const keys = ['shop', 'name', 'link', 'price', 'brand', 'status']
 
-    const keys = ['shop', 'name', 'link', 'price', 'brand', 'status']
-
-    let valid = true
-
-    // keys.some(key => {
-    //     if (!body[key]) 
-    // })
+const phoneUpdateReqValidation = (body) => {
+    return body['shop'] === undefined || body['name'] === undefined
 }
 
+
+
 module.exports = {
-    phoneReqValidation
+    phoneUpdateReqValidation, keys
 }
