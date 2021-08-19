@@ -1,7 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const { searchGet } = require('./search/main')
-const {url} = require('./db/config')
+const { url } = require('./db/config')
 const phoneRoutes = require('./routes/phone')
 const versionRoutes = require('./routes/version')
 
@@ -24,6 +24,6 @@ phoneRoutes(app)
 // version routes
 versionRoutes(app)
 
-app.get('/search', (req, res) => searchGet(req, res))
+app.get('/search', searchGet)
 
 app.listen(3000)
