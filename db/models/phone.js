@@ -18,6 +18,7 @@ const phoneSchema = mongoose.Schema({
     }],
     brand: {type: String, required: true},
     status: {type: String, required: true},
+    latestPrice: {type: Number, min: 1, required: true},
     latestVersion: {type: String, match: [/\d{6}[ABC]/, 'invalid version format'], required: true}
 }, {
     timestamps: true,

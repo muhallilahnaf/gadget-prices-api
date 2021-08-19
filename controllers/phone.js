@@ -86,27 +86,23 @@ const updateOrCreate = (req, res) => {
 
 const findLatest = () => {
     Version.find().sort({ updatedAt: -1 }).limit(1).lean().then(version => {
-        // TODO: find out way to add options for mongo query
-        const name = version[0]['name']
+        const versionName = version[0].name
         const shop = req.query.shop
         const order = req.query.order
         const priceMin = req.query.priceMin
         const priceMax = req.query.priceMax
-
         if ((priceMin && !priceMax) || (!priceMin && priceMax)) return res.send('both priceMin and priceMax required')
-
-        if (order) {
-            const direction = order === 'desc' ? -1 : 1
-            // TODO: fix sort (prices.lastElement.price)
-            Phone.find({ latestVersion: name }).sort({ prices: direction }).lean().then(phones => {
-                return res.send(phones)
-            }).catch(err => {
-                return res.status(500).send({
-                    message: err.message || "Some error occurred while retrieving phones"
-                })
+        const query = {latestVersion: versionName}
+        if (shop) query.shop = shop
+        if (priceMin && priceMax) query.latestPrice = {$gte: priceMin,$lte: priceMax}
+        const direction = order === 'desc' ? -1 : 1
+        Phone.find(query).sort({ latestPrice: direction }).lean().then(phones => {
+            return res.send(phones)
+        }).catch(err => {
+            return res.status(500).send({
+                message: err.message || "Some error occurred while retrieving phones"
             })
-        }
-
+        })
     }).catch(err => {
         return res.status(404).send({
             message: err.message

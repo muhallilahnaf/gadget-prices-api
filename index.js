@@ -1,29 +1,21 @@
+require("dotenv").config()
 const express = require('express')
-const mongoose = require('mongoose')
-const { searchGet } = require('./search/main')
-const { url } = require('./db/config')
+const dbConnect = require('./db/main')
+const searchRoutes = require('./routes/search')
 const phoneRoutes = require('./routes/phone')
 const versionRoutes = require('./routes/version')
-
+const userRoutes = require('./routes/user')
 
 const app = express()
 app.use(express.json())
 
-mongoose.connect(url, {
-    useNewUrlParser: true
-}).then(() => {
-    console.log("Successfully connected to the database")
-}).catch(err => {
-    console.log('Could not connect to the database. Exiting now...', err)
-    process.exit()
-})
+dbConnect()
 
-// phone routes
+searchRoutes(app)
 phoneRoutes(app)
-
-// version routes
 versionRoutes(app)
+userRoutes(app)
 
-app.get('/search', searchGet)
+const port = process.env.PORT || 3000
 
-app.listen(3000)
+app.listen(port, () => console.log(`Listening on port ${port}...`))
